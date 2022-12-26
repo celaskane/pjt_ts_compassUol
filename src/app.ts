@@ -45,6 +45,34 @@ function autobind(
         return medotoAjustado;
     }
 
+// Classe ProjetoLista
+class ProjetoLista {
+    elementoTemplate: HTMLTemplateElement;
+    elementoHost: HTMLDivElement;
+    elemento: HTMLElement;
+
+    constructor(private type: 'active' | 'finished') {
+        this.elementoTemplate = document.getElementById('project-list')! as HTMLTemplateElement;
+        this.elementoHost = document.getElementById('app')! as HTMLDivElement;
+        const nodeImportado = document.importNode(this.elementoTemplate.content, true);
+        this.elemento = nodeImportado.firstElementChild as HTMLElement;
+        this.elemento.id = `${this.type}-projects`;
+        this.anexo();
+        this.renderizarConteudo();
+    }
+
+    private renderizarConteudo() {
+        const listaId = `${this.type}-projects-list`;
+        this.elemento.querySelector('ul')!.id = listaId;
+        this.elemento.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS';
+    }
+
+    private anexo() {
+        this.elementoHost.insertAdjacentElement('beforeend', this.elemento);
+    }
+}
+
+
 // Classe ProjetoEntrada
 class ProjetoEntrada {
     elementoTemplate: HTMLTemplateElement;
@@ -58,7 +86,7 @@ class ProjetoEntrada {
         //importando componentes direto do index.html (devem ser declarados e tipados antes do constructor)
         this.elementoTemplate = document.getElementById('project-input')! as HTMLTemplateElement;
         this.elementoHost = document.getElementById('app')! as HTMLDivElement;
-
+        //import node importa o conteudo
         const nodeImportado = document.importNode(this.elementoTemplate.content, true);
         this.elemento = nodeImportado.firstElementChild as HTMLFormElement;
         this.elemento.id = 'user-input';    //id do app.css
@@ -131,3 +159,5 @@ class ProjetoEntrada {
 }
 
 const pjtEntrada = new ProjetoEntrada();
+const listaProjetoAtivo = new ProjetoLista('active');
+const listaProjetoFinalizado = new ProjetoLista('finished');
