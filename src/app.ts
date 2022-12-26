@@ -41,10 +41,38 @@ class ProjetoEntrada {
         this.anexo(); 
     }
 
+    private juntaEntradaUsuario(): [string, string, number] | void {
+        const tituloEntrada = this.elementoTituloEntrada.value;
+        const descricaoEntrada = this.elementoDescricaoEntrada.value;
+        const pessoasEntrada = this.elementoPessoasEntrada.value;
+
+        if (
+            tituloEntrada.trim().length === 0 || 
+            descricaoEntrada.trim().length === 0 || 
+            pessoasEntrada.trim().length === 0
+            ) {
+                alert('Entrada inválida, tente novamente!');
+                return;
+        } else {
+            return [tituloEntrada, descricaoEntrada, +pessoasEntrada];
+        }
+    }
+
+    private limpaEntradas() {
+        this.elementoTituloEntrada.value = '';
+        this.elementoDescricaoEntrada.value = '';
+        this.elementoPessoasEntrada.value = '';
+    }
+
     @autobind //tsconfig => experimentalDecorators: true
     private controladorEnvio(event: Event) {
         event.preventDefault();
-        console.log(this.elementoTituloEntrada.value);
+        const entradaUsuario = this.juntaEntradaUsuario();
+        if (Array.isArray(entradaUsuario)) {
+            const [titulo, desc, pessoas] = entradaUsuario;
+            console.log(titulo, desc, pessoas);
+            this.limpaEntradas();
+        }
     }
 
     private configure() {
