@@ -115,11 +115,19 @@ class ProjetoLista {
         this.elementoTemplate = document.getElementById('project-list')! as HTMLTemplateElement;
         this.elementoHost = document.getElementById('app')! as HTMLDivElement;
         this.projetosAtribuidos = [];
+
         const nodeImportado = document.importNode(this.elementoTemplate.content, true);
         this.elemento = nodeImportado.firstElementChild as HTMLElement;
         this.elemento.id = `${this.type}-projects`;
+
         estadoProjeto.adicionaOuvinte((projetos: Projeto[]) => {
-            this.projetosAtribuidos = projetos;
+            const projetosRelevantes = projetos.filter(pjt => {
+                if (this.type === 'active') {
+                    return pjt.status === StatusProjeto.Active;
+                }
+                return pjt.status === StatusProjeto.Finished;
+            });
+            this.projetosAtribuidos = projetosRelevantes;
             this.renderizarProjetos();
         });
         this.anexo();
@@ -128,6 +136,7 @@ class ProjetoLista {
 
     renderizarProjetos() {
         const listaElemento = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+        listaElemento.innerHTML = ''; // não duplica projetos na renderização
         for (const itensProjeto of this.projetosAtribuidos) {
             const listaItens = document.createElement('li');
             listaItens.textContent = itensProjeto.titulo;
