@@ -194,7 +194,7 @@ class ProjetoItem extends Componente<HTMLUListElement, HTMLLIElement> implements
 }
 
 // Classe ProjetoLista
-class ProjetoLista extends Componente<HTMLDivElement, HTMLElement> {
+class ProjetoLista extends Componente<HTMLDivElement, HTMLElement> implements AlvoArrasta {
     projetosAtribuidos: Projeto[];
 
     constructor(private type: 'active' | 'finished') {
@@ -205,7 +205,27 @@ class ProjetoLista extends Componente<HTMLDivElement, HTMLElement> {
         this.renderizaConteudo();
     }
 
+    @autobind
+    arrastaSobre(_: DragEvent) {
+        const listaElemento = this.elemento.querySelector('ul')!;
+        listaElemento.classList.add('droppable');
+    }
+
+    solta(_: DragEvent) {
+        
+    }
+
+    @autobind
+    arrastaDesiste(_: DragEvent) {
+        const listaElemento = this.elemento.querySelector('ul')!;
+        listaElemento.classList.remove('droppable');
+    }
+
     configure() {
+        this.elemento.addEventListener('dragover', this.arrastaSobre);
+        this.elemento.addEventListener('dragleave', this.arrastaDesiste);
+        this.elemento.addEventListener('drop', this.solta);
+
         estadoProjeto.adicionaOuvinte((projetos: Projeto[]) => {
             const projetosRelevantes = projetos.filter(pjt => {
                 if (this.type === 'active') {
