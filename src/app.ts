@@ -173,7 +173,8 @@ class ProjetoItem extends Componente<HTMLUListElement, HTMLLIElement> implements
 
     @autobind
     arrastaInicio(event: DragEvent) {
-        console.log(event);
+        event.dataTransfer!.setData('text/plain', this.projeto.id);
+        event.dataTransfer!.effectAllowed = 'move';
     }
 
     arrastaFim(_: DragEvent) {
@@ -206,13 +207,16 @@ class ProjetoLista extends Componente<HTMLDivElement, HTMLElement> implements Al
     }
 
     @autobind
-    arrastaSobre(_: DragEvent) {
-        const listaElemento = this.elemento.querySelector('ul')!;
-        listaElemento.classList.add('droppable');
+    arrastaSobre(event: DragEvent) {
+        if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+            event.preventDefault();
+            const listaElemento = this.elemento.querySelector('ul')!;
+            listaElemento.classList.add('droppable');
+        }
     }
 
-    solta(_: DragEvent) {
-        
+    solta(event: DragEvent) {
+        console.log(event.dataTransfer!.getData('text/plain'));
     }
 
     @autobind
