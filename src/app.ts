@@ -1,3 +1,41 @@
+// Gerenciamento de Estado do Projeto
+class EstadoProjeto {
+    private ouvintes: any[] = [];
+    private projetos: any[] = [];
+    private static instance: EstadoProjeto;
+
+    private constructor() {
+
+    }
+
+    static getInstance() {
+        if (this.instance) {
+            return this.instance;
+        }
+        this.instance = new EstadoProjeto();
+        return this.instance;
+    }
+
+    adicionaOuvinte(ouvinteFn: Function) {
+        this.ouvintes.push(ouvinteFn);
+    }
+
+    adicionaProjeto(titulo: string, descricao: string, numPessoas: number) {
+        const novoProjeto = {
+            id: Math.random().toString(),
+            titulo: titulo,
+            descricao: descricao,
+            pessoas: numPessoas
+        };
+        this.projetos.push(novoProjeto);
+        for (const ouvinteFn of this.ouvintes) {
+            ouvinteFn(this.projetos.slice());
+        }
+    }
+}
+
+const estadoProjeto = EstadoProjeto.getInstance();
+
 // Lógica para Validação
 interface Validavel {
     valor: string | number;
@@ -50,15 +88,30 @@ class ProjetoLista {
     elementoTemplate: HTMLTemplateElement;
     elementoHost: HTMLDivElement;
     elemento: HTMLElement;
+    projetosAtribuidos: any[];
 
     constructor(private type: 'active' | 'finished') {
         this.elementoTemplate = document.getElementById('project-list')! as HTMLTemplateElement;
         this.elementoHost = document.getElementById('app')! as HTMLDivElement;
+        this.projetosAtribuidos = [];
         const nodeImportado = document.importNode(this.elementoTemplate.content, true);
         this.elemento = nodeImportado.firstElementChild as HTMLElement;
         this.elemento.id = `${this.type}-projects`;
+        estadoProjeto.adicionaOuvinte((projetos: any[]) => {
+            this.projetosAtribuidos = projetos;
+            this.renderizarProjetos();
+        });
         this.anexo();
         this.renderizarConteudo();
+    }
+
+    renderizarProjetos() {
+        const listaElemento = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+        for (const itensProjeto of this.projetosAtribuidos) {
+            const listaItens = document.createElement('li');
+            listaItens.textContent = itensProjeto.titulo;
+            listaElemento?.appendChild(listaItens);
+        }
     }
 
     private renderizarConteudo() {
@@ -144,7 +197,7 @@ class ProjetoEntrada {
         const entradaUsuario = this.juntaEntradaUsuario();
         if (Array.isArray(entradaUsuario)) {
             const [titulo, desc, pessoas] = entradaUsuario;
-            console.log(titulo, desc, pessoas);
+            estadoProjeto.adicionaProjeto(titulo, desc, pessoas);
             this.limpaEntradas();
         }
     }
