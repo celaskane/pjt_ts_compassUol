@@ -1,3 +1,21 @@
+// Autobind Decorator
+function autobind(
+    alvo: any, 
+    nomeMetodo: string, 
+    descricao: PropertyDescriptor
+    ) {
+        const metodoOriginal = descricao.value;
+        const medotoAjustado: PropertyDescriptor = {
+            configurable: true,
+            get() {
+                const boundFn = metodoOriginal.bind(this);
+                return boundFn;
+            }
+        };
+        return medotoAjustado;
+    }
+
+// Classe ProjetoEntrada
 class ProjetoEntrada {
     elementoTemplate: HTMLTemplateElement;
     elementoHost: HTMLDivElement;
@@ -23,13 +41,14 @@ class ProjetoEntrada {
         this.anexo(); 
     }
 
+    @autobind //tsconfig => experimentalDecorators: true
     private controladorEnvio(event: Event) {
         event.preventDefault();
         console.log(this.elementoTituloEntrada.value);
     }
 
     private configure() {
-        this.elemento.addEventListener('submit', this.controladorEnvio.bind(this));
+        this.elemento.addEventListener('submit', this.controladorEnvio);
     }
     
     private anexo() {
