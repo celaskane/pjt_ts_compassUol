@@ -1,3 +1,33 @@
+// Lógica para Validação
+interface Validavel {
+    valor: string | number;
+    requerido?: boolean;
+    minTamanho?: number;
+    maxTamanho?: number;
+    min?: number;
+    max?: number;
+}
+
+function valida(entradaValidavel: Validavel) {
+    let ehValido = true;
+    if (entradaValidavel.requerido) {
+        ehValido = ehValido && entradaValidavel.valor.toString().trim().length !== 0;
+    }
+    if (entradaValidavel.minTamanho != null && typeof entradaValidavel.valor === 'string') {
+        ehValido = ehValido && entradaValidavel.valor.length > entradaValidavel.minTamanho
+    }
+    if (entradaValidavel.maxTamanho != null && typeof entradaValidavel.valor === 'string') {
+        ehValido = ehValido && entradaValidavel.valor.length < entradaValidavel.maxTamanho
+    }
+    if (entradaValidavel.min != null && typeof entradaValidavel.valor === 'number') {
+        ehValido = ehValido && entradaValidavel.valor > entradaValidavel.min;
+    }
+    if (entradaValidavel.max != null && typeof entradaValidavel.valor === 'number') {
+        ehValido = ehValido && entradaValidavel.valor < entradaValidavel.max;
+    }
+    return ehValido;
+}
+
 // Autobind Decorator
 function autobind(
     alvo: any, 
@@ -46,10 +76,26 @@ class ProjetoEntrada {
         const descricaoEntrada = this.elementoDescricaoEntrada.value;
         const pessoasEntrada = this.elementoPessoasEntrada.value;
 
+        const tituloValidavel: Validavel = {
+            valor: tituloEntrada,
+            requerido: true
+        };
+        const descricaoValidavel: Validavel = {
+            valor: descricaoEntrada,
+            requerido: true,
+            minTamanho: 5
+        };
+        const pessoasValidavel: Validavel = {
+            valor: +pessoasEntrada,
+            requerido: true,
+            min: 1,
+            max: 5
+        };
+
         if (
-            tituloEntrada.trim().length === 0 || 
-            descricaoEntrada.trim().length === 0 || 
-            pessoasEntrada.trim().length === 0
+            !valida(tituloValidavel) ||
+            !valida(descricaoValidavel) ||
+            !valida(pessoasValidavel)
             ) {
                 alert('Entrada inválida, tente novamente!');
                 return;
