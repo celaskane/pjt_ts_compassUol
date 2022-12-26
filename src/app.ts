@@ -17,15 +17,22 @@ class Projeto {
 }
 
 // Gerenciamento de Estado do Projeto
-type Ouvinte = (itens: Projeto[]) => void;
+type Ouvinte<T> = (itens: T[]) => void;
 
-class EstadoProjeto {
-    private ouvintes: Ouvinte[] = [];
+class Estado<T> {
+    protected ouvintes: Ouvinte<T>[] = [];  //protected permite acesso de classes herdeiras
+
+    adicionaOuvinte(ouvinteFn: Ouvinte<T>) {
+        this.ouvintes.push(ouvinteFn);
+    }
+}
+
+class EstadoProjeto extends Estado<Projeto> {
     private projetos: Projeto[] = [];
     private static instance: EstadoProjeto;
 
     private constructor() {
-
+        super();
     }
 
     static getInstance() {
@@ -34,10 +41,6 @@ class EstadoProjeto {
         }
         this.instance = new EstadoProjeto();
         return this.instance;
-    }
-
-    adicionaOuvinte(ouvinteFn: Ouvinte) {
-        this.ouvintes.push(ouvinteFn);
     }
 
     adicionaProjeto(titulo: string, descricao: string, numPessoas: number) {
@@ -104,22 +107,51 @@ function autobind(
         return medotoAjustado;
     }
 
-// Classe ProjetoLista
-class ProjetoLista {
+// Classe Base Componente
+abstract class Componente<T extends HTMLElement, U extends HTMLElement> {
     elementoTemplate: HTMLTemplateElement;
-    elementoHost: HTMLDivElement;
-    elemento: HTMLElement;
+    elementoHost: T;
+    elemento: U;
+
+    constructor(
+        templateId: string, 
+        hostId: string, 
+        insereNoInicio: boolean,
+        novoElementoId?: string,    //parametros opcionais devem sempre ficar por ultimo
+        ) {
+            this.elementoTemplate = document.getElementById(templateId)! as HTMLTemplateElement;
+            this.elementoHost = document.getElementById(hostId)! as T;
+            
+            const nodeImportado = document.importNode(this.elementoTemplate.content, true);
+            this.elemento = nodeImportado.firstElementChild as U;
+            if (novoElementoId){
+                this.elemento.id = novoElementoId;
+            }
+
+            this.anexo(insereNoInicio);
+        }
+
+    private anexo(insereNoComeco: boolean) {
+        this.elementoHost.insertAdjacentElement(insereNoComeco ? 'afterbegin' : 'beforeend', this.elemento);
+    }
+
+    abstract configure(): void;
+    abstract renderizaConteudo(): void;
+}
+
+// Classe ProjetoLista
+class ProjetoLista extends Componente<HTMLDivElement, HTMLElement> {
     projetosAtribuidos: Projeto[];
 
     constructor(private type: 'active' | 'finished') {
-        this.elementoTemplate = document.getElementById('project-list')! as HTMLTemplateElement;
-        this.elementoHost = document.getElementById('app')! as HTMLDivElement;
+        super('project-list', 'app', false,`${type}-projects`);
         this.projetosAtribuidos = [];
 
-        const nodeImportado = document.importNode(this.elementoTemplate.content, true);
-        this.elemento = nodeImportado.firstElementChild as HTMLElement;
-        this.elemento.id = `${this.type}-projects`;
+        this.configure();
+        this.renderizaConteudo();
+    }
 
+    configure() {
         estadoProjeto.adicionaOuvinte((projetos: Projeto[]) => {
             const projetosRelevantes = projetos.filter(pjt => {
                 if (this.type === 'active') {
@@ -130,11 +162,15 @@ class ProjetoLista {
             this.projetosAtribuidos = projetosRelevantes;
             this.renderizarProjetos();
         });
-        this.anexo();
-        this.renderizarConteudo();
     }
 
-    renderizarProjetos() {
+    renderizaConteudo() {
+        const listaId = `${this.type}-projects-list`;
+        this.elemento.querySelector('ul')!.id = listaId;
+        this.elemento.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS';
+    }
+
+    private renderizarProjetos() {
         const listaElemento = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
         listaElemento.innerHTML = ''; // não duplica projetos na renderização
         for (const itensProjeto of this.projetosAtribuidos) {
@@ -143,43 +179,30 @@ class ProjetoLista {
             listaElemento?.appendChild(listaItens);
         }
     }
-
-    private renderizarConteudo() {
-        const listaId = `${this.type}-projects-list`;
-        this.elemento.querySelector('ul')!.id = listaId;
-        this.elemento.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS';
-    }
-
-    private anexo() {
-        this.elementoHost.insertAdjacentElement('beforeend', this.elemento);
-    }
 }
 
 
 // Classe ProjetoEntrada
-class ProjetoEntrada {
-    elementoTemplate: HTMLTemplateElement;
-    elementoHost: HTMLDivElement;
-    elemento: HTMLFormElement;
+class ProjetoEntrada extends Componente<HTMLDivElement, HTMLFormElement> {
     elementoTituloEntrada: HTMLInputElement;
     elementoDescricaoEntrada: HTMLInputElement;
     elementoPessoasEntrada: HTMLInputElement;
     
     constructor() {
-        //importando componentes direto do index.html (devem ser declarados e tipados antes do constructor)
-        this.elementoTemplate = document.getElementById('project-input')! as HTMLTemplateElement;
-        this.elementoHost = document.getElementById('app')! as HTMLDivElement;
-        //import node importa o conteudo
-        const nodeImportado = document.importNode(this.elementoTemplate.content, true);
-        this.elemento = nodeImportado.firstElementChild as HTMLFormElement;
-        this.elemento.id = 'user-input';    //id do app.css
-
+        super('project-input', 'app', true, 'user-input');
         this.elementoTituloEntrada = this.elemento.querySelector('#title') as HTMLInputElement;
         this.elementoDescricaoEntrada = this.elemento.querySelector('#description') as HTMLInputElement;
         this.elementoPessoasEntrada = this.elemento.querySelector('#people') as HTMLInputElement;
 
-        this.configure();
-        this.anexo(); 
+        this.configure(); 
+    }
+
+    configure() {
+        this.elemento.addEventListener('submit', this.controladorEnvio);
+    }
+
+    renderizaConteudo() {
+        
     }
 
     private juntaEntradaUsuario(): [string, string, number] | void {
@@ -230,14 +253,6 @@ class ProjetoEntrada {
             estadoProjeto.adicionaProjeto(titulo, desc, pessoas);
             this.limpaEntradas();
         }
-    }
-
-    private configure() {
-        this.elemento.addEventListener('submit', this.controladorEnvio);
-    }
-    
-    private anexo() {
-        this.elementoHost.insertAdjacentElement('afterbegin', this.elemento);
     }
 }
 
