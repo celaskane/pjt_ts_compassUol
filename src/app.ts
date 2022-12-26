@@ -64,6 +64,18 @@ class EstadoProjeto extends Estado<Projeto> {
             StatusProjeto.Active
             );
         this.projetos.push(novoProjeto);
+        this.atualizaOuvintes();
+    }
+
+    moveProjeto(projetoId: string, novoStatus: StatusProjeto) {
+        const projeto = this.projetos.find(pjt => pjt.id === projetoId);
+        if (projeto && projeto.status !== novoStatus) {
+            projeto.status = novoStatus;
+            this.atualizaOuvintes();
+        }
+    }
+
+    private atualizaOuvintes() {
         for (const ouvinteFn of this.ouvintes) {
             ouvinteFn(this.projetos.slice());
         }
@@ -215,8 +227,10 @@ class ProjetoLista extends Componente<HTMLDivElement, HTMLElement> implements Al
         }
     }
 
+    @autobind
     solta(event: DragEvent) {
-        console.log(event.dataTransfer!.getData('text/plain'));
+        const projetoId = event.dataTransfer!.getData('text/plain');
+        estadoProjeto.moveProjeto(projetoId, this.type === 'active' ? StatusProjeto.Active : StatusProjeto.Finished);
     }
 
     @autobind
