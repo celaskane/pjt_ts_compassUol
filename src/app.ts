@@ -1,7 +1,27 @@
+// Type Projeto
+enum StatusProjeto { 
+    Active, 
+    Finished
+}
+
+class Projeto {
+    constructor(
+        public id: string, 
+        public titulo: string, 
+        public descricao: string, 
+        public pessoas: number, 
+        public status: StatusProjeto
+        ) {
+
+    }
+}
+
 // Gerenciamento de Estado do Projeto
+type Ouvinte = (itens: Projeto[]) => void;
+
 class EstadoProjeto {
-    private ouvintes: any[] = [];
-    private projetos: any[] = [];
+    private ouvintes: Ouvinte[] = [];
+    private projetos: Projeto[] = [];
     private static instance: EstadoProjeto;
 
     private constructor() {
@@ -16,17 +36,18 @@ class EstadoProjeto {
         return this.instance;
     }
 
-    adicionaOuvinte(ouvinteFn: Function) {
+    adicionaOuvinte(ouvinteFn: Ouvinte) {
         this.ouvintes.push(ouvinteFn);
     }
 
     adicionaProjeto(titulo: string, descricao: string, numPessoas: number) {
-        const novoProjeto = {
-            id: Math.random().toString(),
-            titulo: titulo,
-            descricao: descricao,
-            pessoas: numPessoas
-        };
+        const novoProjeto = new Projeto(
+            Math.random().toString(), 
+            titulo, 
+            descricao, 
+            numPessoas,
+            StatusProjeto.Active
+            );
         this.projetos.push(novoProjeto);
         for (const ouvinteFn of this.ouvintes) {
             ouvinteFn(this.projetos.slice());
@@ -88,7 +109,7 @@ class ProjetoLista {
     elementoTemplate: HTMLTemplateElement;
     elementoHost: HTMLDivElement;
     elemento: HTMLElement;
-    projetosAtribuidos: any[];
+    projetosAtribuidos: Projeto[];
 
     constructor(private type: 'active' | 'finished') {
         this.elementoTemplate = document.getElementById('project-list')! as HTMLTemplateElement;
@@ -97,7 +118,7 @@ class ProjetoLista {
         const nodeImportado = document.importNode(this.elementoTemplate.content, true);
         this.elemento = nodeImportado.firstElementChild as HTMLElement;
         this.elemento.id = `${this.type}-projects`;
-        estadoProjeto.adicionaOuvinte((projetos: any[]) => {
+        estadoProjeto.adicionaOuvinte((projetos: Projeto[]) => {
             this.projetosAtribuidos = projetos;
             this.renderizarProjetos();
         });
