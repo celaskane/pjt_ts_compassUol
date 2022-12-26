@@ -82,10 +82,10 @@ function valida(entradaValidavel: Validavel) {
         ehValido = ehValido && entradaValidavel.valor.length < entradaValidavel.maxTamanho
     }
     if (entradaValidavel.min != null && typeof entradaValidavel.valor === 'number') {
-        ehValido = ehValido && entradaValidavel.valor > entradaValidavel.min;
+        ehValido = ehValido && entradaValidavel.valor >= entradaValidavel.min;
     }
     if (entradaValidavel.max != null && typeof entradaValidavel.valor === 'number') {
-        ehValido = ehValido && entradaValidavel.valor < entradaValidavel.max;
+        ehValido = ehValido && entradaValidavel.valor <= entradaValidavel.max;
     }
     return ehValido;
 }
@@ -142,6 +142,14 @@ abstract class Componente<T extends HTMLElement, U extends HTMLElement> {
 //Classe ProjetoItem
 class ProjetoItem extends Componente<HTMLUListElement, HTMLLIElement> {
     private projeto: Projeto;
+
+    get pessoas() {
+        if (this.projeto.pessoas === 1) {
+            return '1 pessoa atribuída';
+        } else {
+            return `${this.projeto.pessoas} pessoas atribuídas`;
+        }
+    }
     
     constructor(hostId: string, projeto: Projeto) {
         super('single-project', hostId, false, projeto.id);
@@ -157,7 +165,7 @@ class ProjetoItem extends Componente<HTMLUListElement, HTMLLIElement> {
 
     renderizaConteudo() {
         this.elemento.querySelector('h2')!.textContent = this.projeto.titulo;
-        this.elemento.querySelector('h3')!.textContent = this.projeto.pessoas.toString();
+        this.elemento.querySelector('h3')!.textContent = this.pessoas;
         this.elemento.querySelector('p')!.textContent = this.projeto.descricao;
 
     }
