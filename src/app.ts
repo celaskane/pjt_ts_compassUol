@@ -1,3 +1,15 @@
+// Interfaces Arrasta & Solta (Drag & Drop)
+interface Arrastavel {
+    arrastaInicio(event: DragEvent): void;
+    arrastaFim(event: DragEvent): void;
+}
+
+interface AlvoArrasta {
+    arrastaSobre(event: DragEvent): void;
+    solta(event: DragEvent): void;
+    arrastaDesiste(event: DragEvent): void;
+}
+
 // Type Projeto
 enum StatusProjeto { 
     Active, 
@@ -140,7 +152,7 @@ abstract class Componente<T extends HTMLElement, U extends HTMLElement> {
 }
 
 //Classe ProjetoItem
-class ProjetoItem extends Componente<HTMLUListElement, HTMLLIElement> {
+class ProjetoItem extends Componente<HTMLUListElement, HTMLLIElement> implements Arrastavel {
     private projeto: Projeto;
 
     get pessoas() {
@@ -159,8 +171,18 @@ class ProjetoItem extends Componente<HTMLUListElement, HTMLLIElement> {
         this.renderizaConteudo();
     }
 
-    configure(): void {
-        
+    @autobind
+    arrastaInicio(event: DragEvent) {
+        console.log(event);
+    }
+
+    arrastaFim(_: DragEvent) {
+        console.log('ArrastaFim');
+    }
+
+    configure() {
+        this.elemento.addEventListener('dragstart', this.arrastaInicio);
+        this.elemento.addEventListener('dragend', this.arrastaFim);
     }
 
     renderizaConteudo() {
