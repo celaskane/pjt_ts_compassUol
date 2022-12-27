@@ -1,4 +1,4 @@
-import { Projeto, StatusProjeto } from "../models/projeto.js";
+import { Projeto, StatusProjeto } from "../models/projeto";
 
 // Gerenciamento de Estado do Projeto
 type Ouvinte<T> = (itens: T[]) => void;

@@ -1,7 +1,7 @@
-import { Componente } from "./componente-base.js";
-import { Validavel, valida } from "../util/validacao.js";
-import { autobind } from "../decorators/autobind.js";
-import { estadoProjeto } from "../state/projeto-estado.js";
+import { Componente } from "./componente-base";
+import { Validavel, valida } from "../util/validacao";
+import { autobind } from "../decorators/autobind";
+import { estadoProjeto } from "../state/projeto-estado";
 
 
 // Classe ProjetoEntrada

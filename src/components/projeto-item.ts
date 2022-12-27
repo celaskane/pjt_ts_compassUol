@@ -1,7 +1,7 @@
-import { Projeto } from '../models/projeto.js'
-import { Arrastavel } from '../models/arrasta-solta.js';
-import { Componente } from './componente-base.js';
-import { autobind } from '../decorators/autobind.js';
+import { Projeto } from '../models/projeto'
+import { Arrastavel } from '../models/arrasta-solta';
+import { Componente } from './componente-base';
+import { autobind } from '../decorators/autobind';
 
 //Classe ProjetoItem
 export class ProjetoItem extends Componente<HTMLUListElement, HTMLLIElement> implements Arrastavel {
