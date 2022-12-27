@@ -1,4 +1,8 @@
 /// <reference path="componente-base.ts" />
+/// <reference path="../decorators/autobind.ts" />
+/// <reference path="../state/projeto-estado.ts" />
+/// <reference path="../models/projeto.ts" />
+/// <reference path="../models/arrasta-solta.ts" />
 
 namespace App {
     // Classe ProjetoLista
