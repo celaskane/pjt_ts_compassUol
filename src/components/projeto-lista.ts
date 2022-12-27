@@ -1,9 +1,9 @@
-import { Componente } from "./componente-base";
-import { AlvoArrasta } from "../models/arrasta-solta";
-import { Projeto, StatusProjeto } from "../models/projeto";
-import { autobind } from "../decorators/autobind";
-import { estadoProjeto } from "../state/projeto-estado";
-import { ProjetoItem } from "./projeto-item";
+import { Componente } from "./componente-base.js";
+import { AlvoArrasta } from "../models/arrasta-solta.js";
+import { Projeto, StatusProjeto } from "../models/projeto.js";
+import { autobind } from "../decorators/autobind.js";
+import { estadoProjeto } from "../state/projeto-estado.js";
+import { ProjetoItem } from "./projeto-item.js";
 
 // Classe ProjetoLista
 export class ProjetoLista extends Componente<HTMLDivElement, HTMLElement> implements AlvoArrasta {
